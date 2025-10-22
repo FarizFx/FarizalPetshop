@@ -1,0 +1,42 @@
+# Compiled assets (if any)
+assets/compiled/
+
+# Uploads directory (user uploaded files)
+assets/uploads/
+
+# Cache files
+function/cache/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database dumps (optional, if you don't want to commit)
+# database/*.sql  # Uncomment if you want to exclude SQL files
+
+# Node modules (if any)
+node_modules/
+
+# Composer (if PHP)
+vendor/
