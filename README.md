@@ -62,12 +62,8 @@ Atau download ZIP dan ekstrak ke folder htdocs/XAMPP Anda.
 ### 2. Konfigurasi Database
 
 - Buka phpMyAdmin (biasanya di http://localhost/phpmyadmin)
-- Buat database baru dengan nama `login_petshop`
-- Import file SQL dari folder `database/`:
-  - `database/login_petshop.sql` (tabel utama)
-  - `database/create_roles_table.sql` (tabel roles)
-  - `database/create_settings_table.sql` (tabel settings)
-  - `database/update_user_table.sql` (update tabel user jika diperlukan)
+- Buat database baru dengan nama `farizalpetshop_db`
+- Import file SQL `database/database.sql` dari folder `database/`
 
 ### 3. Konfigurasi Aplikasi
 
@@ -86,7 +82,7 @@ Atau gunakan environment variables untuk keamanan yang lebih baik.
 
 - Pastikan Apache dan MySQL di XAMPP sudah berjalan
 - Akses aplikasi di browser: `http://localhost/farizalpetshop/`
-- Login dengan akun default atau daftar akun baru
+- Login dengan akun default (username: admin, password: admin) atau daftar akun baru
 
 ### 5. Struktur Folder
 
