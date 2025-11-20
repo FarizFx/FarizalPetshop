@@ -53,8 +53,8 @@ Ikuti langkah-langkah berikut untuk menjalankan aplikasi di komputer Anda:
 ### 1. Clone atau Download Repository
 
 ```bash
-git clone https://github.com/yourusername/farizalpetshop.git
-cd farizalpetshop
+git clone https://github.com/FarizFx/FarizalPetshop.git
+cd FarizalPetshop
 ```
 
 Atau download ZIP dan ekstrak ke folder htdocs/XAMPP Anda.
