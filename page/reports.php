@@ -26,13 +26,15 @@ if (strtotime($start_date) > strtotime($end_date)) {
     $end_date = date('Y-m-t');
 }
 
-// Sales Report Data
+// Sales Report Data menggunakan harga_modal tersimpan
 $sales_query = "
     SELECT
         COUNT(DISTINCT p.id_penjualan) as total_transactions,
         SUM(p.total_harga) as total_revenue,
         AVG(p.total_harga) as avg_transaction,
-        COUNT(dp.id_detail) as total_items_sold
+        COUNT(dp.id_detail) as total_items_sold,
+        COALESCE(SUM(dp.qty * dp.harga_modal), 0) as total_cost,
+        (SUM(p.total_harga) - COALESCE(SUM(dp.qty * dp.harga_modal), 0)) as total_profit
     FROM penjualan p
     LEFT JOIN detail_penjualan dp ON p.id_penjualan = dp.id_penjualan
     WHERE DATE(p.tanggal) BETWEEN ? AND ?
@@ -50,7 +52,9 @@ $category_query = "
         k.nama_kategori,
         COUNT(DISTINCT p.id_penjualan) as transactions,
         SUM(dp.qty) as items_sold,
-        SUM(dp.subtotal) as revenue
+        SUM(dp.subtotal) as revenue,
+        COALESCE(SUM(dp.qty * dp.harga_modal), 0) as cost,
+        (SUM(dp.subtotal) - COALESCE(SUM(dp.qty * dp.harga_modal), 0)) as profit
     FROM kategori k
     LEFT JOIN produk pr ON k.id_kategori = pr.id_kategori
     LEFT JOIN detail_penjualan dp ON pr.id_produk = dp.id_produk
@@ -70,16 +74,18 @@ $category_stmt->close();
 $product_query = "
     SELECT
         pr.nama_produk,
-        pr.harga,
+        pr.harga_jual,
         k.nama_kategori,
         SUM(dp.qty) as total_sold,
-        SUM(dp.subtotal) as total_revenue
+        SUM(dp.subtotal) as total_revenue,
+        COALESCE(SUM(dp.qty * dp.harga_modal), 0) as total_cost,
+        (SUM(dp.subtotal) - COALESCE(SUM(dp.qty * dp.harga_modal), 0)) as total_profit
     FROM produk pr
     LEFT JOIN kategori k ON pr.id_kategori = k.id_kategori
     LEFT JOIN detail_penjualan dp ON pr.id_produk = dp.id_produk
     LEFT JOIN penjualan p ON dp.id_penjualan = p.id_penjualan
     WHERE DATE(p.tanggal) BETWEEN ? AND ?
-    GROUP BY pr.id_produk, pr.nama_produk, pr.harga, k.nama_kategori
+    GROUP BY pr.id_produk, pr.nama_produk, pr.harga_jual, k.nama_kategori
     ORDER BY total_sold DESC
     LIMIT 10
 ";
@@ -95,8 +101,11 @@ $daily_query = "
     SELECT
         DATE(p.tanggal) as date,
         COUNT(DISTINCT p.id_penjualan) as transactions,
-        SUM(p.total_harga) as revenue
+        SUM(p.total_harga) as revenue,
+        COALESCE(SUM(dp.qty * dp.harga_modal), 0) as cost,
+        (SUM(p.total_harga) - COALESCE(SUM(dp.qty * dp.harga_modal), 0)) as profit
     FROM penjualan p
+    LEFT JOIN detail_penjualan dp ON p.id_penjualan = dp.id_penjualan
     WHERE DATE(p.tanggal) BETWEEN ? AND ?
     GROUP BY DATE(p.tanggal)
     ORDER BY DATE(p.tanggal)
@@ -113,8 +122,11 @@ $monthly_query = "
     SELECT
         DATE_FORMAT(p.tanggal, '%Y-%m') as month,
         COUNT(DISTINCT p.id_penjualan) as transactions,
-        SUM(p.total_harga) as revenue
+        SUM(p.total_harga) as revenue,
+        COALESCE(SUM(dp.qty * dp.harga_modal), 0) as cost,
+        (SUM(p.total_harga) - COALESCE(SUM(dp.qty * dp.harga_modal), 0)) as profit
     FROM penjualan p
+    LEFT JOIN detail_penjualan dp ON p.id_penjualan = dp.id_penjualan
     WHERE p.tanggal >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
     GROUP BY DATE_FORMAT(p.tanggal, '%Y-%m')
     ORDER BY month
@@ -341,6 +353,14 @@ function formatCurrency($amount, $currency_type) {
                                                     <td><?= __('Total Items Sold') ?></td>
                                                     <td class="text-end fw-bold text-warning"><?= number_format($sales_data['total_items_sold'] ?? 0) ?></td>
                                                 </tr>
+                                                <tr>
+                                                    <td>Total Modal</td>
+                                                    <td class="text-end fw-bold text-danger">Rp <?= number_format($sales_data['total_cost'] ?? 0, 0, ',', '.') ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total Profit</td>
+                                                    <td class="text-end fw-bold text-success">Rp <?= number_format($sales_data['total_profit'] ?? 0, 0, ',', '.') ?></td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -361,6 +381,8 @@ function formatCurrency($amount, $currency_type) {
                                                     <th class="text-end"><?= __('Transactions') ?></th>
                                                     <th class="text-end"><?= __('Items Sold') ?></th>
                                                     <th class="text-end"><?= __('Revenue') ?></th>
+                                                    <th class="text-end">Cost</th>
+                                                    <th class="text-end">Profit</th>
                                                     <th class="text-end"><?= __('Contribution') ?> (%)</th>
                                                 </tr>
                                             </thead>
@@ -375,6 +397,8 @@ function formatCurrency($amount, $currency_type) {
                                                         <td class="text-end"><?= number_format($row['transactions']) ?></td>
                                                         <td class="text-end"><?= number_format($row['items_sold']) ?></td>
                                                         <td class="text-end text-success fw-bold"><?= formatCurrency($row['revenue'], $currency) ?></td>
+                                                        <td class="text-end text-danger fw-bold">Rp <?= number_format($row['cost'], 0, ',', '.') ?></td>
+                                                        <td class="text-end text-success fw-bold">Rp <?= number_format($row['profit'], 0, ',', '.') ?></td>
                                                         <td class="text-end">
                                                             <span class="badge bg-primary"><?= number_format($contribution, 1) ?>%</span>
                                                         </td>
@@ -402,6 +426,8 @@ function formatCurrency($amount, $currency_type) {
                                                     <th class="text-end"><?= __('Unit Price') ?></th>
                                                     <th class="text-end"><?= __('Units Sold') ?></th>
                                                     <th class="text-end"><?= __('Total Revenue') ?></th>
+                                                    <th class="text-end">Total Cost</th>
+                                                    <th class="text-end">Total Profit</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -416,6 +442,8 @@ function formatCurrency($amount, $currency_type) {
                                                         <td class="text-end"><?= formatCurrency($row['harga'], $currency) ?></td>
                                                         <td class="text-end fw-bold text-warning"><?= number_format($row['total_sold']) ?></td>
                                                         <td class="text-end fw-bold text-success"><?= formatCurrency($row['total_revenue'], $currency) ?></td>
+                                                        <td class="text-end text-danger fw-bold">Rp <?= number_format($row['total_cost'], 0, ',', '.') ?></td>
+                                                        <td class="text-end text-success fw-bold">Rp <?= number_format($row['total_profit'], 0, ',', '.') ?></td>
                                                     </tr>
                                                 <?php endwhile; ?>
                                             </tbody>
@@ -464,11 +492,13 @@ function formatCurrency($amount, $currency_type) {
 $daily_labels = [];
 $daily_revenue = [];
 $daily_transactions = [];
+$daily_profit = [];
 
 while ($row = $daily_data->fetch_assoc()) {
     $daily_labels[] = date('d/m', strtotime($row['date']));
     $daily_revenue[] = $row['revenue'];
     $daily_transactions[] = $row['transactions'];
+    $daily_profit[] = $row['profit'];
 }
 ?>
 
@@ -491,6 +521,13 @@ new Chart(dailyCtx, {
             backgroundColor: 'rgba(240, 147, 251, 0.1)',
             tension: 0.4,
             yAxisID: 'y1'
+        }, {
+            label: '<?= __('Profit') ?>',
+            data: <?= json_encode($daily_profit) ?>,
+            borderColor: '#43e97b',
+            backgroundColor: 'rgba(67, 233, 123, 0.1)',
+            tension: 0.4,
+            yAxisID: 'y'
         }]
     },
     options: {
@@ -503,7 +540,7 @@ new Chart(dailyCtx, {
                 position: 'left',
                 title: {
                     display: true,
-                    text: '<?= __('Revenue (IDR)') ?>'
+                    text: '<?= __('Revenue/Profit (IDR)') ?>'
                 }
             },
             y1: {
@@ -526,10 +563,12 @@ new Chart(dailyCtx, {
 <?php
 $monthly_labels = [];
 $monthly_revenue = [];
+$monthly_profit = [];
 
 while ($row = $monthly_data->fetch_assoc()) {
     $monthly_labels[] = date('M Y', strtotime($row['month'] . '-01'));
     $monthly_revenue[] = $row['revenue'];
+    $monthly_profit[] = $row['profit'];
 }
 ?>
 
@@ -544,6 +583,12 @@ new Chart(monthlyCtx, {
             backgroundColor: '#4facfe',
             borderColor: '#00f2fe',
             borderWidth: 1
+        }, {
+            label: '<?= __('Monthly Profit') ?>',
+            data: <?= json_encode($monthly_profit) ?>,
+            backgroundColor: '#43e97b',
+            borderColor: '#38f9d7',
+            borderWidth: 1
         }]
     },
     options: {
@@ -554,7 +599,7 @@ new Chart(monthlyCtx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: '<?= __('Revenue (IDR)') ?>'
+                    text: '<?= __('Revenue/Profit (IDR)') ?>'
                 }
             }
         }

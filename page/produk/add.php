@@ -11,10 +11,12 @@ try {
         $id_kategori = $_POST['id_kategori'];
         $merk = htmlspecialchars($_POST['merk']);
         $harga = str_replace('.', '', $_POST['harga']);
+        $harga_modal = str_replace('.', '', $_POST['harga_modal']);
         $stok = $_POST['stok'];
         $deskripsi = htmlspecialchars($_POST['deskripsi']);
+        $satuan = htmlspecialchars($_POST['satuan']);
 
-        $query = mysqli_query($connection, "INSERT INTO produk (nama_produk, id_kategori, merk, harga, stok, deskripsi) VALUES ('$nama_produk', '$id_kategori', '$merk', '$harga', '$stok', '$deskripsi')");
+        $query = mysqli_query($connection, "INSERT INTO produk (nama_produk, id_kategori, merk, harga, harga_modal, stok, deskripsi, satuan) VALUES ('$nama_produk', '$id_kategori', '$merk', '$harga', '$harga_modal', '$stok', '$deskripsi', '$satuan')");
 
         if ($query) {
             $message = "Produk berhasil ditambahkan";
@@ -120,9 +122,15 @@ try {
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="harga" placeholder="Harga" name="harga" required 
+                        <input type="text" class="form-control" id="harga_modal" placeholder="Harga Modal" name="harga_modal" required
                                oninput="formatCurrency(this)">
-                        <label for="harga">Harga</label>
+                        <label for="harga_modal">Harga Modal</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="harga" placeholder="Harga Jual" name="harga" required
+                               oninput="formatCurrency(this)">
+                        <label for="harga">Harga Jual</label>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -133,6 +141,22 @@ try {
                     <div class="mb-3">
                         <label for="deskripsi" class="form-label">Deskripsi</label>
                         <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="satuan" class="form-label">Satuan</label>
+                        <select class="form-select" id="satuan" name="satuan" required>
+                            <option value="pcs">pcs</option>
+                            <option value="dus">dus</option>
+                            <option value="pack">pack</option>
+                            <option value="box">box</option>
+                            <option value="kg">kg</option>
+                            <option value="liter">liter</option>
+                            <option value="meter">meter</option>
+                            <option value="lembar">lembar</option>
+                            <option value="buah">buah</option>
+                            <option value="botol">botol</option>
+                        </select>
                     </div>
 
                     <div class="mb-3">

@@ -28,16 +28,26 @@ if(isset($_GET['id'])) {
     ");
     $penjualan = mysqli_fetch_assoc($query_penjualan);
     
-    // Query detail penjualan - TIDAK DIUBAH
+    // Query detail penjualan dengan harga modal tersimpan
     $query_detail = mysqli_query($connection, "
-        SELECT d.*, pr.nama_produk, pr.harga as harga_satuan
+        SELECT d.*, pr.nama_produk, pr.harga_jual as harga_satuan, d.harga_modal
         FROM detail_penjualan d
         JOIN produk pr ON d.id_produk = pr.id_produk
         WHERE d.id_penjualan = '$id_penjualan'
     ");
-    
+
     // Hitung total item - TIDAK DIUBAH
     $total_item = mysqli_num_rows($query_detail);
+
+    // Hitung total modal untuk transaksi ini
+    $total_modal = 0;
+    mysqli_data_seek($query_detail, 0); // Reset pointer
+    while($row = mysqli_fetch_assoc($query_detail)) {
+        $total_modal += $row['qty'] * $row['harga_modal'];
+    }
+    mysqli_data_seek($query_detail, 0); // Reset pointer kembali
+
+    $profit_transaksi = $penjualan['total_harga'] - $total_modal;
     ?>
     
     <!-- Hanya tambahkan div wrapper untuk spacing -->
@@ -70,6 +80,16 @@ if(isset($_GET['id'])) {
                         <?php endif; ?>
                     </td>
                 </tr>
+                <tr>
+                    <th>Total Modal</th>
+                    <td>Rp <?= number_format($total_modal, 0, ',', '.') ?></td>
+                </tr>
+                <tr>
+                    <th>Profit Transaksi</th>
+                    <td class="<?= $profit_transaksi >= 0 ? 'text-success' : 'text-danger' ?>">
+                        Rp <?= number_format($profit_transaksi, 0, ',', '.') ?>
+                    </td>
+                </tr>
             </table>
         </div>
     </div>
@@ -81,21 +101,35 @@ if(isset($_GET['id'])) {
                 <tr>
                     <th>#</th>
                     <th><?= __('Product Name') ?></th>
-                    <th><?= __('Unit Price') ?></th>
+                    <th>Harga Modal</th>
+                    <th>Harga Jual</th>
+                    <th>Profit per Item</th>
                     <th><?= __('Quantity') ?></th>
+                    <th>Total Modal</th>
+                    <th>Total Profit</th>
                     <th><?= __('Subtotal') ?></th>
                 </tr>
             </thead>
             <tbody>
-                <?php 
+                <?php
                 $no = 1;
-                while($detail = mysqli_fetch_assoc($query_detail)): 
+                while($detail = mysqli_fetch_assoc($query_detail)):
+                    $modal_per_item = $detail['qty'] * $detail['harga_modal'];
+                    $profit_per_item = ($detail['harga_satuan'] - $detail['harga_modal']) * $detail['qty'];
                 ?>
                     <tr>
                         <td><?= $no++ ?></td>
                         <td><?= htmlspecialchars($detail['nama_produk']) ?></td>
+                        <td>Rp <?= number_format($detail['harga_modal'], 0, ',', '.') ?></td>
                         <td>Rp <?= number_format($detail['harga_satuan'], 0, ',', '.') ?></td>
+                        <td class="<?= $profit_per_item >= 0 ? 'text-success' : 'text-danger' ?>">
+                            Rp <?= number_format($profit_per_item, 0, ',', '.') ?>
+                        </td>
                         <td><?= $detail['qty'] ?></td>
+                        <td>Rp <?= number_format($modal_per_item, 0, ',', '.') ?></td>
+                        <td class="<?= $profit_per_item >= 0 ? 'text-success' : 'text-danger' ?>">
+                            Rp <?= number_format($profit_per_item, 0, ',', '.') ?>
+                        </td>
                         <td>Rp <?= number_format($detail['subtotal'], 0, ',', '.') ?></td>
                     </tr>
                 <?php endwhile; ?>

@@ -11,15 +11,17 @@ try {
     $query2 = mysqli_query($connection, "SELECT id_produk FROM produk"); 
     $data2 = mysqli_fetch_all($query2);
     $produk = count($data2);
-$tanggal_hari_ini = date('Y-m-d');
+    $tanggal_hari_ini = date('Y-m-d');
     $total_pendapatan = 0;
-    
+    $total_modal_harian = 0;
+    $total_profit_harian = 0;
+
     $query_pendapatan = mysqli_query($connection, "
-        SELECT COALESCE(SUM(total_harga), 0) as total 
-        FROM penjualan 
+        SELECT COALESCE(SUM(total_harga), 0) as total
+        FROM penjualan
         WHERE DATE(tanggal) = '$tanggal_hari_ini'
     ");
-    
+
     if(!$query_pendapatan) {
         error_log("Error pendapatan: " . mysqli_error($connection));
     } else {
@@ -27,15 +29,46 @@ $tanggal_hari_ini = date('Y-m-d');
         $total_pendapatan = $result['total'] ?? 0;
     }
 
+    // Hitung modal harian menggunakan harga_modal tersimpan
+    $query_modal_harian = mysqli_query($connection, "
+        SELECT COALESCE(SUM(dp.qty * dp.harga_modal), 0) as total_modal
+        FROM detail_penjualan dp
+        JOIN penjualan p ON dp.id_penjualan = p.id_penjualan
+        WHERE DATE(p.tanggal) = '$tanggal_hari_ini'
+    ");
+
+    if($query_modal_harian) {
+        $result_modal = mysqli_fetch_assoc($query_modal_harian);
+        $total_modal_harian = $result_modal['total_modal'] ?? 0;
+        $total_profit_harian = $total_pendapatan - $total_modal_harian;
+    }
+
     $bulan_ini = date('Y-m');
     $total_pendapatan_bulan = 0;
+    $total_modal_bulan = 0;
+    $total_profit_bulan = 0;
+
     $query_bulanan = mysqli_query($connection, "
-        SELECT COALESCE(SUM(total_harga), 0) as total 
-        FROM penjualan 
+        SELECT COALESCE(SUM(total_harga), 0) as total
+        FROM penjualan
         WHERE DATE_FORMAT(tanggal, '%Y-%m') = '$bulan_ini'
     ");
     if($query_bulanan) {
         $total_pendapatan_bulan = mysqli_fetch_assoc($query_bulanan)['total'];
+    }
+
+    // Hitung modal bulanan menggunakan harga_modal tersimpan
+    $query_modal_bulan = mysqli_query($connection, "
+        SELECT COALESCE(SUM(dp.qty * dp.harga_modal), 0) as total_modal
+        FROM detail_penjualan dp
+        JOIN penjualan p ON dp.id_penjualan = p.id_penjualan
+        WHERE DATE_FORMAT(p.tanggal, '%Y-%m') = '$bulan_ini'
+    ");
+
+    if($query_modal_bulan) {
+        $result_modal_bulan = mysqli_fetch_assoc($query_modal_bulan);
+        $total_modal_bulan = $result_modal_bulan['total_modal'] ?? 0;
+        $total_profit_bulan = $total_pendapatan_bulan - $total_modal_bulan;
     }
 
 } catch (Exception $e) {
@@ -79,52 +112,46 @@ $tanggal_hari_ini = date('Y-m-d');
             </div>
         </div>
     </div>
-    <section class="row">
-        <div class="col-12 col-lg-12">
+    <section class="row py-0 mt-0 mb-0">
+        <div class="col-16">
             <div class="row">
-                <div class="column-gap-3 gap-4 d-flex flex-column flex-md-row">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
-                                    <div class="stats-icon blue mb-2">
-                                        <i class="iconly-boldProfile"></i>
-                                    </div>
+                <div class="row gx-2 ">
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card my-2 mx-auto">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon blue me-3">
+                                    <i class="iconly-boldCategory"></i>
                                 </div>
-                                <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                <div>
                                     <h6 class="text-muted font-semibold">Jumlah Kategori</h6>
                                     <h6 class="font-extrabold mb-0"><?= $kategori ?></h6>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
-                                    <div class="stats-icon blue mb-2">
-                                        <i class="iconly-boldProfile"></i>
-                                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-0">
+                        <div class="card my-2">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon blue me-3">
+                                    <i class="iconly-boldBuy"></i>
                                 </div>
-                                <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                <div>
                                     <h6 class="text-muted font-semibold">Jumlah Produk</h6>
                                     <h6 class="font-extrabold mb-0"><?= $produk ?></h6>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
-                                    <div class="stats-icon blue mb-2">
-                                        <i class="iconly-boldProfile"></i>
-                                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-0">
+                        <div class="card my-2">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon blue me-3">
+                                    <i class="iconly-boldWallet"></i>
                                 </div>
-                                <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                    <h6 class="text-muted font-semibold">Jumlah Pendapatan</h6>
+                                <div>
+                                    <h6 class="text-muted font-semibold">Pendapatan Hari Ini</h6>
                                     <h6 class="font-extrabold mb-0">
-                                     <?php 
+                                     <?php
                                      if(isset($total_pendapatan)) {
                                          echo 'Rp ' . number_format($total_pendapatan, 0, ',', '.');
                                      } else {
@@ -139,18 +166,59 @@ $tanggal_hari_ini = date('Y-m-d');
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 col-lg-12 col-xl-10 col-xxl-5 d-flex justify-content-start">
-                                    <div class="stats-icon blue mb-2">
-                                        <i class="iconly-boldProfile"></i>
-                                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-0">
+                        <div class="card my-2">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon red me-3">
+                                    <i class="iconly-boldBuy"></i>
                                 </div>
-                                <div class="col-md-1 col-lg-12 col-xl-12 col-xxl-7">
-                                    <h6 class="text-muted font-semibold">Jumlah Pendapatan Bulanan</h6>
+                                <div>
+                                    <h6 class="text-muted font-semibold">Modal Hari Ini</h6>
                                     <h6 class="font-extrabold mb-0">
-                                     <?php 
+                                     <?php
+                                     if(isset($total_modal_harian)) {
+                                         echo 'Rp ' . number_format($total_modal_harian, 0, ',', '.');
+                                     } else {
+                                         echo '<span class="text-danger">Error</span>';
+                                     }
+                                     ?>
+                                 </h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-0">
+                        <div class="card my-2">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon green me-3">
+                                    <i class="iconly-boldChart"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted font-semibold">Profit Hari Ini</h6>
+                                    <h6 class="font-extrabold mb-0">
+                                     <?php
+                                     if(isset($total_profit_harian)) {
+                                         $color_class = $total_profit_harian >= 0 ? 'text-success' : 'text-danger';
+                                         echo '<span class="' . $color_class . '">Rp ' . number_format($total_profit_harian, 0, ',', '.') . '</span>';
+                                     } else {
+                                         echo '<span class="text-danger">Error</span>';
+                                     }
+                                     ?>
+                                 </h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-0">
+                        <div class="card my-2">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon blue me-3">
+                                    <i class="iconly-boldWallet"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted font-semibold">Pendapatan Bulanan</h6>
+                                    <h6 class="font-extrabold mb-0">
+                                     <?php
                                      if(isset($total_pendapatan_bulan)) {
                                          echo 'Rp ' . number_format($total_pendapatan_bulan, 0, ',', '.');
                                      } else {
@@ -165,16 +233,59 @@ $tanggal_hari_ini = date('Y-m-d');
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-0">
+                        <div class="card my-2">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon red me-3">
+                                    <i class="iconly-boldBuy"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted font-semibold">Modal Bulanan</h6>
+                                    <h6 class="font-extrabold mb-0">
+                                     <?php
+                                     if(isset($total_modal_bulan)) {
+                                         echo 'Rp ' . number_format($total_modal_bulan, 0, ',', '.');
+                                     } else {
+                                         echo '<span class="text-danger">Error</span>';
+                                     }
+                                     ?>
+                                 </h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-0">
+                        <div class="card my-2">
+                            <div class="card-body d-flex align-items-center mb-0">
+                                <div class="stats-icon green me-3">
+                                    <i class="iconly-boldChart"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-muted font-semibold">Profit Bulanan</h6>
+                                    <h6 class="font-extrabold mb-0">
+                                     <?php
+                                     if(isset($total_profit_bulan)) {
+                                         $color_class = $total_profit_bulan >= 0 ? 'text-success' : 'text-danger';
+                                         echo '<span class="' . $color_class . '">Rp ' . number_format($total_profit_bulan, 0, ',', '.') . '</span>';
+                                     } else {
+                                         echo '<span class="text-danger">Error</span>';
+                                     }
+                                     ?>
+                                 </h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
     <section class="content">
-      <div class="container-fluid">
+      <div class="container-fluid mt-4">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-sm-6 p-0 mx-auto">
             <div class="card card-info">
-              <div class="card-header"> Line Chart
+              <div class="card-header pb-0"> Line Chart
                 <h3 class="card-title">Penjualan Perbulan</h3>
 
                 <div class="card-tools">
@@ -186,7 +297,7 @@ $tanggal_hari_ini = date('Y-m-d');
                   </button>
                 </div>
               </div>
-              <div class="card-body">
+              <div class="card-body mb-4">
                 <div class="chart">
                   <canvas id="lineChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                 </div>
@@ -194,12 +305,11 @@ $tanggal_hari_ini = date('Y-m-d');
               <!-- /.card-body -->
             </div>
             <!-- /.card -->
-
-           
-
+          </div>
+          <div class="col-sm-6 pl-2">
             <!-- DONUT CHART -->
             <div class="card card-danger">
-              <div class="card-header"> Donut Chart
+              <div class="card-header pb-0"> Donut Chart
                 <h3 class="card-title">Penjualan Per Kategori</h3>
 
                 <div class="card-tools">
@@ -211,7 +321,7 @@ $tanggal_hari_ini = date('Y-m-d');
                   </button>
                 </div>
               </div>
-              <div class="card-body">
+              <div class="card-body mb-4">
                 <canvas id="donutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
               </div>
               <!-- /.card-body -->

@@ -66,14 +66,19 @@ try {
                     $qty = $item['qty'];
                     $harga = $item['harga'];
                     $subtotal = $harga * $qty;
-                
+
+                    // Ambil harga_modal dari produk
+                    $query_modal = mysqli_query($connection, "SELECT harga_modal FROM produk WHERE id_produk = '$id_produk'");
+                    $produk_data = mysqli_fetch_assoc($query_modal);
+                    $harga_modal = $produk_data['harga_modal'];
+
                     mysqli_query($connection, "
-                        INSERT INTO detail_penjualan (id_penjualan, id_produk, qty, harga, subtotal)
-                        VALUES ('$id_penjualan', '$id_produk', '$qty', '$harga', '$subtotal')
+                        INSERT INTO detail_penjualan (id_penjualan, id_produk, qty, harga, harga_modal, subtotal)
+                        VALUES ('$id_penjualan', '$id_produk', '$qty', '$harga', '$harga_modal', '$subtotal')
                     ");
-                
+
                     mysqli_query($connection, "
-                        UPDATE produk SET stok = stok - $qty 
+                        UPDATE produk SET stok = stok - $qty
                         WHERE id_produk = '$id_produk'
                     ");
                 }
@@ -98,7 +103,7 @@ try {
 }
 
 $produk = mysqli_query($connection, "
-    SELECT p.id_produk, p.nama_produk, p.harga, p.stok, k.nama_kategori
+    SELECT p.id_produk, p.nama_produk, p.harga_jual, p.stok, k.nama_kategori
     FROM produk p
     LEFT JOIN kategori k ON p.id_kategori = k.id_kategori
     WHERE p.stok > 0
@@ -174,9 +179,9 @@ $produk = mysqli_query($connection, "
                                         </td>
                                         <td><?= htmlspecialchars($p['nama_kategori']) ?></td>
                                         <td>
-                                            Rp <?= number_format($p['harga'], 0, ',', '.') ?>
-                                            <input type="hidden" name="produk[<?= $p['id_produk'] ?>][harga]" 
-                                                   value="<?= $p['harga'] ?>" class="harga-produk">
+                                            Rp <?= number_format($p['harga_jual'], 0, ',', '.') ?>
+                                            <input type="hidden" name="produk[<?= $p['id_produk'] ?>][harga]"
+                                                   value="<?= $p['harga_jual'] ?>" class="harga-produk">
                                         </td>
                                         <td><?= $p['stok'] ?></td>
                                         <td>

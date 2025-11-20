@@ -2,7 +2,17 @@
 include "./function/connection.php";
 include "./function/language.php";
 
-$query = mysqli_query($connection, "SELECT * FROM kategori");
+$query = mysqli_query($connection, "
+    SELECT k.*,
+           COUNT(p.id_produk) as jumlah_produk,
+           COALESCE(SUM(p.harga_jual * p.stok), 0) as total_nilai_stok,
+           COALESCE(SUM(p.harga_modal * p.stok), 0) as total_modal_stok,
+           (COALESCE(SUM(p.harga_jual * p.stok), 0) - COALESCE(SUM(p.harga_modal * p.stok), 0)) as estimasi_profit
+    FROM kategori k
+    LEFT JOIN produk p ON k.id_kategori = p.id_kategori
+    GROUP BY k.id_kategori
+    ORDER BY k.id_kategori
+");
 ?>
 <div class="page-heading">
     <div class="page-title">
@@ -37,6 +47,10 @@ $query = mysqli_query($connection, "SELECT * FROM kategori");
                             <tr>
                                 <th>#</th>
                                 <th><?= __('Category Name') ?></th>
+                                <th>Jumlah Produk</th>
+                                <th>Total Nilai Stok</th>
+                                <th>Total Modal Stok</th>
+                                <th>Estimasi Profit</th>
                                 <th><?= __('Description') ?></th>
                                 <th><?= __('Action') ?></th>
                             </tr>
@@ -48,8 +62,14 @@ $query = mysqli_query($connection, "SELECT * FROM kategori");
                                 while ($data = mysqli_fetch_assoc($query)) : ?>
                                     <tr>
                                         <td><?= $i++ ?></td>
-                                        <td><?= $data['nama_kategori'] ?></td>
-                                        <td><?= $data['deskripsi'] ?></td>
+                                        <td><?= htmlspecialchars($data['nama_kategori']) ?></td>
+                                        <td class="text-center"><?= $data['jumlah_produk'] ?></td>
+                                        <td class="text-end">Rp <?= number_format($data['total_nilai_stok'], 0, ',', '.') ?></td>
+                                        <td class="text-end">Rp <?= number_format($data['total_modal_stok'], 0, ',', '.') ?></td>
+                                        <td class="text-end <?= $data['estimasi_profit'] >= 0 ? 'text-success' : 'text-danger' ?>">
+                                            Rp <?= number_format($data['estimasi_profit'], 0, ',', '.') ?>
+                                        </td>
+                                        <td><?= htmlspecialchars($data['deskripsi'] ?? '-') ?></td>
                                         <td>
                                             <a class="btn btn-primary btn-sm" href="index.php?halaman=ubah_kategori&id=<?= $data['id_kategori'] ?>"><?= __('Edit') ?></a>
                                             <a class="btn btn-danger btn-sm" id="btn-hapus" href="index.php?halaman=hapus_kategori&id=<?= $data['id_kategori'] ?>" onclick="confirmModal(event)"><?= __('Delete') ?></a>

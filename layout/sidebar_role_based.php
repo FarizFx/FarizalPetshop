@@ -16,6 +16,19 @@ $users = false;
 $roles = false;
 $settings = false;
 $profile = false;
+$tambah_kategori = false;
+$ubah_kategori = false;
+$tambah_produk = false;
+$ubah_produk = false;
+$tambah_penjualan = false;
+$ubah_penjualan = false;
+$reports = false;
+$stok = false;
+$tambah_stok = false;
+$kurangi_stok = false;
+$pembelian = false;
+$tambah_pembelian = false;
+$ubah_pembelian = false;
 
 if (isset($_GET['halaman'])) {
     $halaman = $_GET['halaman'];
@@ -58,6 +71,24 @@ if (isset($_GET['halaman'])) {
             break;
         case 'reports':
             $reports = true;
+            break;
+        case 'stok':
+            $stok = true;
+            break;
+        case 'tambah_stok':
+            $tambah_stok = true;
+            break;
+        case 'kurangi_stok':
+            $kurangi_stok = true;
+            break;
+        case 'pembelian':
+            $pembelian = true;
+            break;
+        case 'tambah_pembelian':
+            $tambah_pembelian = true;
+            break;
+        case 'ubah_pembelian':
+            $ubah_pembelian = true;
             break;
         case 'settings':
             $settings = true;
@@ -155,11 +186,29 @@ if (isset($_GET['halaman'])) {
                             </a>
                         </li>
                     <?php endif; ?>
+
+                    <?php if (isset($allowed_menu_items['stock'])): ?>
+                        <li class="sidebar-item <?= $stok || $tambah_stok || $kurangi_stok ? 'active' : '' ?>">
+                            <a href="<?= $allowed_menu_items['stock']['url'] ?>" class="sidebar-link">
+                                <i class="<?= $allowed_menu_items['stock']['icon'] ?>"></i>
+                                <span><?= $allowed_menu_items['stock']['title'] ?></span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php if (isset($allowed_menu_items['purchases'])): ?>
+                        <li class="sidebar-item <?= $pembelian || $tambah_pembelian || $ubah_pembelian ? 'active' : '' ?>">
+                            <a href="<?= $allowed_menu_items['purchases']['url'] ?>" class="sidebar-link">
+                                <i class="<?= $allowed_menu_items['purchases']['icon'] ?>"></i>
+                                <span><?= $allowed_menu_items['purchases']['title'] ?></span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <!-- Management Section -->
                 <?php if (isset($allowed_menu_items['users']) || isset($allowed_menu_items['roles'])): ?>
-                    <li class="sidebar-title"><?= __('Management') ?></li>
+                    <li class="sidebar-title"><?= __('Manajemen') ?></li>
 
                     <?php if (isset($allowed_menu_items['users'])): ?>
                         <li class="sidebar-item <?= $users ? 'active' : '' ?>">

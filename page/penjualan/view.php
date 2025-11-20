@@ -18,10 +18,13 @@ $currency = $settings['currency'] ?? 'IDR';
 
 // Query untuk mendapatkan data penjualan tanpa customer
 $query = mysqli_query($connection, "
-    SELECT p.id_penjualan, p.tanggal, p.total_harga, 
-           COUNT(d.id_detail) as jumlah_item
+    SELECT p.id_penjualan, p.tanggal, p.total_harga,
+           COUNT(d.id_detail) as jumlah_item,
+           SUM(d.qty * pr.harga_modal) as total_modal,
+           SUM((d.qty * pr.harga_jual) - (d.qty * pr.harga_modal)) as total_profit
     FROM penjualan p
     LEFT JOIN detail_penjualan d ON p.id_penjualan = d.id_penjualan
+    LEFT JOIN produk pr ON d.id_produk = pr.id_produk
     GROUP BY p.id_penjualan
     ORDER BY p.tanggal DESC
 ");
@@ -115,6 +118,8 @@ body.modal-open .sidebar {
                             <th><?= __('Date') ?></th>
                             <th><?= __('Quantity') ?></th>
                             <th><?= __('Total Price') ?></th>
+                            <th>Total Modal</th>
+                            <th>Total Profit</th>
                             <th><?= __('Action') ?></th>
                             </tr>
                         </thead>
@@ -133,6 +138,20 @@ body.modal-open .sidebar {
                                             <?php endif; ?>
                                         </td>
                                         <td>
+                                            <?php if ($currency == 'USD'): ?>
+                                                $ <?= number_format(($data['total_modal'] ?? 0) * getExchangeRate('IDR', 'USD'), 2, '.', ',') ?>
+                                            <?php else: ?>
+                                                Rp <?= number_format($data['total_modal'] ?? 0, 0, ',', '.') ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="<?= ($data['total_profit'] ?? 0) >= 0 ? 'text-success' : 'text-danger' ?>">
+                                            <?php if ($currency == 'USD'): ?>
+                                                $ <?= number_format(($data['total_profit'] ?? 0) * getExchangeRate('IDR', 'USD'), 2, '.', ',') ?>
+                                            <?php else: ?>
+                                                Rp <?= number_format($data['total_profit'] ?? 0, 0, ',', '.') ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
                                           <button class="btn btn-sm btn-info btn-detail"
                                                  data-id="<?= $data['id_penjualan'] ?>">
                                              <i class="bi bi-eye"></i> <?= __('Detail') ?>
@@ -147,7 +166,7 @@ body.modal-open .sidebar {
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="5" class="text-center"><?= __('No sales data') ?></td>
+                                    <td colspan="7" class="text-center"><?= __('No sales data') ?></td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>

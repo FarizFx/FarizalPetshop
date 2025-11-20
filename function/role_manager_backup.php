@@ -259,67 +259,61 @@ class RoleManager {
     public function getAllowedMenuItems() {
         $menu_items = [
             'dashboard' => [
-                'title' => __('Dashboard'),
+                'title' => 'Dashboard',
                 'icon' => 'bi-grid-fill',
                 'url' => 'index.php?halaman=beranda',
                 'permission' => 'view_dashboard'
             ],
             'categories' => [
-                'title' => __('Kategori'),
+                'title' => 'Kategori',
                 'icon' => 'bi-grid-3x3-gap-fill',
                 'url' => 'index.php?halaman=kategori',
                 'permission' => 'category_management'
             ],
             'products' => [
-                'title' => __('Produk'),
+                'title' => 'Produk',
                 'icon' => 'bi-box-seam-fill',
                 'url' => 'index.php?halaman=produk',
                 'permission' => 'product_management'
             ],
             'sales' => [
-                'title' => __('Laporan Penjualan'),
+                'title' => 'Laporan Penjualan',
                 'icon' => 'bi-receipt-cutoff',
                 'url' => 'index.php?halaman=penjualan',
                 'permission' => 'sales_management'
             ],
             'stock' => [
-                'title' => __('Manajemen Stok'),
+                'title' => 'Manajemen Stok',
                 'icon' => 'bi-boxes',
                 'url' => 'index.php?halaman=stok',
-                'permission' => 'stock_management'
-            ],
-            'purchases' => [
-                'title' => __('Pembelian'),
-                'icon' => 'bi-cart-plus',
-                'url' => 'index.php?halaman=pembelian',
-                'permission' => 'purchase_management'
+                'permission' => 'product_management'
             ],
             'reports' => [
-                'title' => __('Laporan'),
+                'title' => 'Laporan',
                 'icon' => 'bi-bar-chart-fill',
                 'url' => 'index.php?halaman=reports',
                 'permission' => 'report_management'
             ],
             'users' => [
-                'title' => __('Manajemen User'),
+                'title' => 'Manajemen User',
                 'icon' => 'bi-people-fill',
                 'url' => 'index.php?halaman=users',
                 'permission' => 'user_management'
             ],
             'roles' => [
-                'title' => __('Manajemen Role'),
+                'title' => 'Manajemen Role',
                 'icon' => 'bi-shield-check',
                 'url' => 'index.php?halaman=roles',
                 'permission' => 'role_management'
             ],
             'settings' => [
-                'title' => __('Pengaturan'),
+                'title' => 'Pengaturan',
                 'icon' => 'bi-gear-fill',
                 'url' => 'index.php?halaman=settings',
                 'permission' => 'system_settings'
             ],
             'profile' => [
-                'title' => __('Profil'),
+                'title' => 'Profil',
                 'icon' => 'bi-person-circle',
                 'url' => 'index.php?halaman=profile',
                 'permission' => 'view_profile'
@@ -375,40 +369,6 @@ class RoleManager {
         } else {
             $stmt->close();
             return ['success' => false, 'message' => 'Gagal menghapus role dari database'];
-        }
-    }
-
-    /**
-     * Membuat role baru
-     */
-    public function createRole($role_name, $role_level) {
-        // Validasi role name dan level
-        if ($this->roleExists($role_name)) {
-            return ['success' => false, 'message' => "Role '$role_name' sudah ada!"];
-        }
-
-        if ($role_level < 0 || $role_level > 100) {
-            return ['success' => false, 'message' => 'Role level harus antara 0-100!'];
-        }
-
-        // Insert role baru ke database dengan permissions kosong
-        $empty_permissions = json_encode([]);
-        $stmt = $this->connection->prepare("INSERT INTO roles (role_name, role_level, permissions) VALUES (?, ?, ?)");
-        $stmt->bind_param("sis", $role_name, $role_level, $empty_permissions);
-
-        if ($stmt->execute()) {
-            $stmt->close();
-
-            // Reload roles dari database
-            $this->loadRolesFromDB();
-
-            // Log aksi pembuatan role
-            $this->logRoleAction('CREATE_ROLE', "Role: $role_name, Level: $role_level");
-
-            return ['success' => true, 'message' => "Role '$role_name' berhasil dibuat!"];
-        } else {
-            $stmt->close();
-            return ['success' => false, 'message' => "Gagal membuat role '$role_name'!"];
         }
     }
 

@@ -8,7 +8,7 @@ if(isset($_GET['modal']) && $_GET['modal'] == '1') {
 
 if (isset($_GET['halaman'])) {
     $halaman = $_GET['halaman'];
-    
+
     // Handle request modal
     if(defined('MODAL_REQUEST')) {
         if($halaman == 'detail_penjualan' && isset($_GET['id'])) {
@@ -23,7 +23,7 @@ if (isset($_GET['halaman'])) {
         exit;
     }
 
-    
+
     // Main routing
     switch ($halaman) {
         case 'beranda':
@@ -97,6 +97,24 @@ if (isset($_GET['halaman'])) {
             break;
         case 'reports':
             include "page/reports.php";
+            break;
+        case 'stok':
+            include "page/stok/view.php";
+            break;
+        case 'ubah_stok':
+            include "page/stok/edit.php";
+            break;
+        case 'pembelian':
+            include "page/pembelian/view.php";
+            break;
+        case 'tambah_pembelian':
+            include "page/pembelian/add.php";
+            break;
+        case 'ubah_pembelian':
+            include "page/pembelian/edit.php";
+            break;
+        case 'detail_pembelian':
+            include "page/pembelian/detail.php";
             break;
         default:
             include "page/error.php";

@@ -1,9 +1,9 @@
 <?php
 ob_start();
 session_start();
-include "./function/language.php";
-include "./function/connection.php";
-include_once "./function/role_manager.php";
+include "function/language.php";
+include "function/connection.php";
+include_once "function/role_manager.php";
 
 // Initialize global role manager
 global $role_manager;
@@ -34,7 +34,7 @@ if (isset($_GET['modal']) && $_GET['modal'] == '1') {
     if (!defined('MODAL_REQUEST')) {
         define('MODAL_REQUEST', true);
     }
-    require("./function/menu.php");
+    require("function/menu.php");
     exit;
 }
 ?>
@@ -65,17 +65,17 @@ if (isset($_GET['modal']) && $_GET['modal'] == '1') {
     <script src="./assets/static/js/initTheme.js"></script>
     <div id="app">
         <!-- Start Sidebar -->
-        <?php require("./layout/sidebar_role_based.php") ?>
+        <?php require("layout/sidebar_role_based.php") ?>
         <!-- End Sidebar -->
         <div id="main" class="layout-navbar navbar-fixed">
             <!-- Start Header -->
-            <?php require("./layout/header.php") ?>
+            <?php require("layout/header.php") ?>
             <!-- End Header -->
             <div id="main-content" class="">
-                <?php require("./function/menu.php") ?>
+                <?php require("function/menu.php") ?>
             </div>
             <!-- Start Footer -->
-            <?php require("./layout/footer.php") ?>
+            <?php require("layout/footer.php") ?>
             <!-- End Footer -->
         </div>
     </div>

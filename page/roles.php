@@ -4,6 +4,7 @@ include "./function/language.php";
 include_once "./function/role_manager.php";
 
 // Inisialisasi role manager
+global $role_manager;
 $role_manager = new RoleManager($connection);
 
 // Cek permission untuk mengakses halaman ini
@@ -11,6 +12,11 @@ if (!hasPermission('role_management')) {
     include "page/error.php";
     exit();
 }
+
+// Handle success messages from session
+$success = $_SESSION['success'] ?? '';
+unset($_SESSION['success']); // Clear it after displaying
+session_write_close(); // Ensure session is saved
 
 // Handle actions
 $action = $_GET['action'] ?? '';
@@ -43,24 +49,13 @@ if ($action === 'create_role' && isset($_POST['role_name']) && isset($_POST['rol
     $role_name = $_POST['role_name'];
     $role_level = (int)$_POST['role_level'];
 
-    // Validasi role name dan level
-    if ($role_manager->roleExists($role_name)) {
-        $error = "Role '$role_name' sudah ada!";
-    } elseif ($role_level < 0 || $role_level > 100) {
-        $error = "Role level harus antara 0-100!";
-    } else {
-        // Insert role baru ke database dengan permissions kosong
-        $empty_permissions = json_encode([]);
-        $stmt = $connection->prepare("INSERT INTO roles (role_name, role_level, permissions) VALUES (?, ?, ?)");
-        $stmt->bind_param("sis", $role_name, $role_level, $empty_permissions);
+    // Gunakan method createRole dari RoleManager
+    $result = $role_manager->createRole($role_name, $role_level);
 
-        if ($stmt->execute()) {
-            $success = "Role '$role_name' berhasil dibuat!";
-            $role_manager->logRoleAction('CREATE_ROLE', "Role: $role_name, Level: $role_level");
-        } else {
-            $error = "Gagal membuat role '$role_name'!";
-        }
-        $stmt->close();
+    if ($result['success']) {
+        $success = $result['message'];
+    } else {
+        $error = $result['message'];
     }
 }
 
@@ -107,21 +102,7 @@ $role_hierarchy = $role_manager->getRoleHierarchy();
                     </div>
                 </div>
 
-                <?php if (isset($success)): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>
-                        <?= $success ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
 
-                <?php if (isset($error)): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <?= $error ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
 
                 <section class="section">
                     <div class="row mb-4">
@@ -251,6 +232,7 @@ $role_hierarchy = $role_manager->getRoleHierarchy();
                                             'product_management' => 'Manajemen Produk',
                                             'category_management' => 'Manajemen Kategori',
                                             'sales_management' => 'Manajemen Penjualan',
+                                            'stock_management' => 'Manajemen Stok',
                                             'report_management' => 'Manajemen Laporan',
                                             'system_settings' => 'Pengaturan Sistem',
                                             'backup_restore' => 'Backup & Restore',
@@ -306,6 +288,7 @@ $role_hierarchy = $role_manager->getRoleHierarchy();
                                             'product_management' => 'Manajemen Produk',
                                             'category_management' => 'Manajemen Kategori',
                                             'sales_management' => 'Manajemen Penjualan',
+                                            'stock_management' => 'Manajemen Stok',
                                             'report_management' => 'Manajemen Laporan'
                                         ],
                                         'System' => [
@@ -411,6 +394,7 @@ $role_hierarchy = $role_manager->getRoleHierarchy();
 
 
     <script src="./assets/compiled/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Embed permissions data for all roles
@@ -473,6 +457,36 @@ $role_hierarchy = $role_manager->getRoleHierarchy();
                         form.submit();
                     }
                 });
+            }
+        });
+
+        // Close modal if it's still open after successful role creation
+        const successAlert = document.querySelector('.alert-success');
+        if (successAlert && successAlert.textContent.includes('berhasil dibuat')) {
+            const createRoleModal = bootstrap.Modal.getInstance(document.getElementById('createRoleModal'));
+            if (createRoleModal) {
+                createRoleModal.hide();
+            }
+        }
+
+        // Show SweetAlert for success/error messages
+        <?php if (!empty($success)): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: <?= json_encode($success) ?>,
+                confirmButtonText: 'OK'
+            });
+        <?php endif; ?>
+
+        <?php if (!empty($error)): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: <?= json_encode($error) ?>,
+                confirmButtonText: 'OK'
+            });
+        <?php endif; ?>
     </script>
 
 

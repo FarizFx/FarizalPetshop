@@ -10,15 +10,17 @@ if(isset($_POST['submit'])) {
     $id_kategori = $_POST['id_kategori'];
     $merk = htmlspecialchars($_POST['merk']);
     $harga = str_replace('.', '', $_POST['harga']);
+    $harga_modal = str_replace('.', '', $_POST['harga_modal']);
     $stok = $_POST['stok'];
     $deskripsi = htmlspecialchars($_POST['deskripsi']);
 
     $query = mysqli_query($connection, "
-        UPDATE produk SET 
+        UPDATE produk SET
         nama_produk = '$nama_produk',
         id_kategori = '$id_kategori',
         merk = '$merk',
         harga = '$harga',
+        harga_modal = '$harga_modal',
         stok = '$stok',
         deskripsi = '$deskripsi'
         WHERE id_produk = '$id_produk'
@@ -108,15 +110,22 @@ $kategori = mysqli_query($connection, "SELECT * FROM kategori");
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="harga">Harga</label>
-                        <input type="text" class="form-control" id="harga" name="harga" 
-                               value="<?= number_format($produk['harga'], 0, ',', '.') ?>" required
+                        <label for="harga_modal">Harga Modal</label>
+                        <input type="text" class="form-control" id="harga_modal" name="harga_modal"
+                               value="<?= number_format($produk['harga_modal'] ?? 0, 0, ',', '.') ?>" required
+                               oninput="formatCurrency(this)">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="harga">Harga Jual</label>
+                        <input type="text" class="form-control" id="harga" name="harga"
+                               value="<?= number_format($produk['harga'] ?? 0, 0, ',', '.') ?>" required
                                oninput="formatCurrency(this)">
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="stok">Stok</label>
-                        <input type="number" class="form-control" id="stok" name="stok" 
+                        <input type="number" class="form-control" id="stok" name="stok"
                                value="<?= $produk['stok'] ?>" required min="0">
                     </div>
 
