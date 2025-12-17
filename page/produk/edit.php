@@ -1,29 +1,50 @@
 <?php
 include "./function/connection.php";
 
-$id_produk = $_GET['id'];
-$query_produk = mysqli_query($connection, "SELECT * FROM produk WHERE id_produk = '$id_produk'");
+// Check if user has product_management permission
+if (!hasPermission('product_management')) {
+    echo "
+    <script>
+    Swal.fire({
+        title: 'Akses Ditolak',
+        text: 'Anda tidak memiliki izin untuk mengelola produk',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+    }).then(() => {
+        window.location.href = 'index.php?halaman=produk';
+    })
+    </script>
+    ";
+    exit();
+}
+
+
+$id = $_GET['id'];
+$query_produk = mysqli_query($connection, "SELECT * FROM produk WHERE id_produk = '$id'");
 $produk = mysqli_fetch_assoc($query_produk);
 
 if(isset($_POST['submit'])) {
-    $nama_produk = htmlspecialchars($_POST['nama_produk']);
-    $id_kategori = $_POST['id_kategori'];
+    $nama = htmlspecialchars($_POST['nama_produk']);
+    $kategori_id = $_POST['id_kategori'];
     $merk = htmlspecialchars($_POST['merk']);
     $harga = str_replace('.', '', $_POST['harga']);
     $harga_modal = str_replace('.', '', $_POST['harga_modal']);
     $stok = $_POST['stok'];
     $deskripsi = htmlspecialchars($_POST['deskripsi']);
 
+
     $query = mysqli_query($connection, "
         UPDATE produk SET
-        nama_produk = '$nama_produk',
-        id_kategori = '$id_kategori',
+        nama_produk = '$nama',
+        id_kategori = '$kategori_id',
         merk = '$merk',
-        harga = '$harga',
+        harga_jual = '$harga',
         harga_modal = '$harga_modal',
         stok = '$stok',
         deskripsi = '$deskripsi'
-        WHERE id_produk = '$id_produk'
+        WHERE id_produk = '$id'
     ");
 
     if($query) {
@@ -92,6 +113,7 @@ $kategori = mysqli_query($connection, "SELECT * FROM kategori");
 
                     <div class="form-group mb-3">
                         <label for="id_kategori">Kategori</label>
+
                         <select class="form-select" id="id_kategori" name="id_kategori" required>
                             <option value="">Pilih Kategori</option>
                             <?php while($k = mysqli_fetch_assoc($kategori)): ?>
@@ -118,8 +140,9 @@ $kategori = mysqli_query($connection, "SELECT * FROM kategori");
 
                     <div class="form-group mb-3">
                         <label for="harga">Harga Jual</label>
+
                         <input type="text" class="form-control" id="harga" name="harga"
-                               value="<?= number_format($produk['harga'] ?? 0, 0, ',', '.') ?>" required
+                               value="<?= number_format($produk['harga_jual'] ?? 0, 0, ',', '.') ?>" required
                                oninput="formatCurrency(this)">
                     </div>
 

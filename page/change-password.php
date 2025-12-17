@@ -1,59 +1,27 @@
 <?php
+// Aktifkan laporan error PHP untuk debugging. Hapus ini saat production.
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+
+// ----------------------------------------------------
+// 1. Inisialisasi Sesi & Proteksi Akses
+// ----------------------------------------------------
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Cek apakah pengguna sudah login
 if (!isset($_SESSION['nama'])) {
     header('Location: login.php');
     exit();
 }
 
-require_once './function/connection.php'; // Correct DB connection file
-include './function/language.php';
+// ----------------------------------------------------
+// 2. Load Dependensi
+// ----------------------------------------------------
+require_once './function/connection.php'; 
+include './function/language.php';      
 
-$message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $current_password = $_POST['current_password'] ?? '';
-    $new_password = $_POST['new_password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-
-    if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
-        $message = __('All fields must be filled.');
-    } elseif ($new_password !== $confirm_password) {
-        $message = __('New password and confirmation password do not match.');
-    } else {
-        // Fetch current password hash from DB
-        $user_id = $_SESSION['user_id'] ?? null;
-        if (!$user_id) {
-            $message = __('User not found.');
-        } else {
-            $stmt = $connection->prepare("SELECT password FROM user WHERE id = ?");
-            $stmt->bind_param("i", $user_id);
-            $stmt->execute();
-            $stmt->bind_result($hashed_password);
-            if ($stmt->fetch()) {
-                if (password_verify($current_password, $hashed_password)) {
-                    // Update password
-                    $stmt->close();
-                    $new_hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                    $update_stmt = $connection->prepare("UPDATE user SET password = ? WHERE id = ?");
-                    $update_stmt->bind_param("si", $new_hashed_password, $user_id);
-                    if ($update_stmt->execute()) {
-                        $message = __('Password successfully changed.');
-                    } else {
-                        $message = __('Failed to change password.');
-                    }
-                    $update_stmt->close();
-                } else {
-                    $message = __('Current password is wrong.');
-                }
-            } else {
-                $message = __('User not found.');
-            }
-            $stmt->close();
-        }
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -63,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><?= __('Change Password') ?> - Farizal Petshop</title>
     <link rel="stylesheet" href="../assets/compiled/css/app.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
@@ -70,19 +39,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="card">
-                    <div class="card-header bg-primary text-white p-3  ">
+                    <div class="card-header bg-primary text-white p-3">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-shield-lock me-2"></i><?= __('Change Password') ?>
                         </h5>
                     </div>
                     <div class="card-body">
-                        <?php if ($message): ?>
-                            <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
-                        <?php endif; ?>
-
+                        
                         <div class="row">
-                            <div class="col-md-6 ">
-                                <form method="POST" action="change-password.php" enctype="multipart/form-data">
+                            <div class="col-md-6">
+                                <form method="POST" action="page/process_change_password.php">
                                     <div class="mb-3 mt-4">
                                         <label for="current_password" class="form-label"><?= __('Current Password') ?> *</label>
                                         <input type="password" class="form-control" id="current_password" name="current_password" required placeholder="<?= __('Current password') ?>">
@@ -145,7 +111,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const type = this.checked ? 'text' : 'password';
 
             passwordFields.forEach(fieldId => {
-                document.getElementById(fieldId).type = type;
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.type = type;
+                }
             });
         });
     </script>

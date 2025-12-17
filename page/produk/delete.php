@@ -7,16 +7,16 @@ try {
     $error = FALSE;
 
     if (isset($_GET['id'])) {
-        $id = $_GET['id'];
+        $id = (int)$_GET['id'];
 
-        $select = mysqli_query($connection, "SELECT nama FROM kontak WHERE id = '$id'");
+        $select = mysqli_query($connection, "SELECT nama_produk FROM produk WHERE id_produk = '$id'");
         $data = mysqli_fetch_assoc($select);
 
         if (!$data) {
             header('Location: index.php?halaman=produk');
         }
 
-        $query = mysqli_query($connection, "DELETE FROM kontak WHERE id = '$id'");
+        $query = mysqli_query($connection, "DELETE FROM produk WHERE id_produk = '$id'");
 
         if ($query == TRUE) {
             $message = "Berhasil menghapus data";

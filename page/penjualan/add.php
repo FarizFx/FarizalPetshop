@@ -73,8 +73,7 @@ try {
                     $harga_modal = $produk_data['harga_modal'];
 
                     mysqli_query($connection, "
-                        INSERT INTO detail_penjualan (id_penjualan, id_produk, qty, harga, harga_modal, subtotal)
-                        VALUES ('$id_penjualan', '$id_produk', '$qty', '$harga', '$harga_modal', '$subtotal')
+                        INSERT INTO detail_penjualan (id_penjualan, id_produk, qty, harga, harga_jual, harga_modal, subtotal) VALUES ('$id_penjualan', '$id_produk', '$qty', '$harga', '$harga', '$harga_modal', '$subtotal')
                     ");
 
                     mysqli_query($connection, "

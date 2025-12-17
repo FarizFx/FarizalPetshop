@@ -5,15 +5,22 @@ if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST')
     exit();
 }
 
-// Include HTML structure for proper rendering
-include "../layout/header.php";
-?>
-
-<?php
 session_start();
 include "../function/connection.php";
 include "../function/language.php";
 include_once "../function/role_manager.php";
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing User Addition</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<?php
 
 // Inisialisasi role manager
 $role_manager = new RoleManager($connection);
@@ -30,7 +37,7 @@ if (!hasPermission('user_management')) {
         timer: 3000,
         timerProgressBar: true,
     }).then(() => {
-        window.location.href = 'index.php?halaman=users';
+        window.location.href = '../index.php?halaman=users';
     })
     </script>
     ";
@@ -56,7 +63,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
             timer: 3000,
             timerProgressBar: true,
         }).then(() => {
-            window.location.href = 'index.php?halaman=users';
+            window.location.href = '../index.php?halaman=users';
         })
         </script>
         ";
@@ -75,7 +82,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
             timer: 3000,
             timerProgressBar: true,
         }).then(() => {
-            window.location.href = 'index.php?halaman=users';
+            window.location.href = '../index.php?halaman=users';
         })
         </script>
         ";
@@ -95,7 +102,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
             timer: 3000,
             timerProgressBar: true,
         }).then(() => {
-            window.location.href = 'index.php?halaman=users';
+            window.location.href = '../index.php?halaman=users';
         })
         </script>
         ";
@@ -122,7 +129,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
             timer: 3000,
             timerProgressBar: true,
         }).then(() => {
-            window.location.href = 'index.php?halaman=users';
+            window.location.href = '../index.php?halaman=users';
         })
         </script>
         ";
@@ -145,7 +152,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
             timer: 3000,
             timerProgressBar: true,
         }).then(() => {
-            window.location.href = 'index.php?halaman=users';
+            window.location.href = '../index.php?halaman=users';
         })
         </script>
         ";
@@ -171,7 +178,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
             timer: 2000,
             timerProgressBar: true,
         }).then(() => {
-            window.location.href = 'index.php?halaman=users';
+            window.location.href = '../index.php?halaman=users';
         })
         </script>
         ";
@@ -188,7 +195,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
             timer: 3000,
             timerProgressBar: true,
         }).then(() => {
-            window.location.href = 'index.php?halaman=users';
+            window.location.href = '../index.php?halaman=users';
         })
         </script>
         ";
@@ -205,7 +212,7 @@ if (isset($_POST['nama']) && isset($_POST['username']) && isset($_POST['password
         timer: 3000,
         timerProgressBar: true,
     }).then(() => {
-        window.location.href = 'index.php?halaman=users';
+        window.location.href = '../index.php?halaman=users';
     })
     </script>
     ";

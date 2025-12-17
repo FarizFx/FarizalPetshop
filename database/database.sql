@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 06, 2023 at 05:14 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Dec 15, 2025 at 07:49 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -14,25 +14,218 @@ SET time_zone = "+00:00";
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `farizalpetshop_db`
+-- Database: `login_petshop`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `kontak`
+-- Table structure for table `detail_pembelian`
 --
 
-CREATE TABLE `kontak` (
-  `id` int(11) NOT NULL,
-  `nama` varchar(150) NOT NULL,
-  `nomor_hp` varchar(15) NOT NULL,
-  `status` varchar(150) NOT NULL
+CREATE TABLE `detail_pembelian` (
+  `id_detail` int(11) NOT NULL,
+  `id_pembelian` int(11) NOT NULL,
+  `id_produk` int(11) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `harga` decimal(15,2) NOT NULL,
+  `subtotal` decimal(15,2) NOT NULL,
+  `satuan` varchar(50) NOT NULL DEFAULT 'pcs',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `detail_pembelian`
+--
+
+INSERT INTO `detail_pembelian` (`id_detail`, `id_pembelian`, `id_produk`, `qty`, `harga`, `subtotal`, `satuan`, `created_at`) VALUES
+(7, 5, 8, 2, 10000.00, 20000.00, 'pcs', '2025-11-27 13:20:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `detail_penjualan`
+--
+
+CREATE TABLE `detail_penjualan` (
+  `id_detail` int(11) NOT NULL,
+  `id_penjualan` int(11) NOT NULL,
+  `id_produk` int(11) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `harga` decimal(12,2) NOT NULL,
+  `harga_jual` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `harga_modal` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `subtotal` decimal(12,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `detail_penjualan`
+--
+
+INSERT INTO `detail_penjualan` (`id_detail`, `id_penjualan`, `id_produk`, `qty`, `harga`, `harga_jual`, `harga_modal`, `subtotal`) VALUES
+(32, 23, 8, 1, 20000.00, 20000.00, 10000.00, 20000.00),
+(33, 23, 10, 1, 38000.00, 38000.00, 19000.00, 38000.00),
+(40, 29, 8, 1, 20000.00, 0.00, 10000.00, 20000.00),
+(41, 29, 9, 1, 15000.00, 0.00, 7500.00, 15000.00),
+(42, 29, 10, 1, 38000.00, 0.00, 19000.00, 38000.00),
+(43, 29, 11, 1, 38000.00, 0.00, 19000.00, 38000.00),
+(44, 30, 8, 1, 20000.00, 0.00, 10000.00, 20000.00),
+(45, 30, 9, 3, 15000.00, 0.00, 7500.00, 45000.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `kategori`
+--
+
+CREATE TABLE `kategori` (
+  `id_kategori` int(11) NOT NULL,
+  `nama_kategori` varchar(100) NOT NULL,
+  `deskripsi` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `kategori`
+--
+
+INSERT INTO `kategori` (`id_kategori`, `nama_kategori`, `deskripsi`, `created_at`, `updated_at`) VALUES
+(1, 'Makanan Kucing', 'Makanan untuk kucing', '2025-07-21 23:21:08', '2025-10-01 06:13:04'),
+(2, 'Pasir Kucing', 'pasir kucing', '2025-07-22 02:46:59', '2025-07-22 02:46:59');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pembelian`
+--
+
+CREATE TABLE `pembelian` (
+  `id_pembelian` int(11) NOT NULL,
+  `tanggal` timestamp NOT NULL DEFAULT current_timestamp(),
+  `total_harga` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `keterangan` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pembelian`
+--
+
+INSERT INTO `pembelian` (`id_pembelian`, `tanggal`, `total_harga`, `keterangan`, `created_at`, `updated_at`) VALUES
+(5, '2025-11-27 13:08:00', 20000.00, '', '2025-11-27 13:20:48', '2025-11-27 13:20:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `penjualan`
+--
+
+CREATE TABLE `penjualan` (
+  `id_penjualan` int(11) NOT NULL,
+  `tanggal` datetime NOT NULL DEFAULT current_timestamp(),
+  `total_harga` decimal(12,2) NOT NULL,
+  `keterangan` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `penjualan`
+--
+
+INSERT INTO `penjualan` (`id_penjualan`, `tanggal`, `total_harga`, `keterangan`) VALUES
+(23, '2025-07-24 13:10:38', 58000.00, NULL),
+(25, '2025-09-16 11:35:28', 0.00, NULL),
+(29, '2025-11-27 16:29:08', 111000.00, NULL),
+(30, '2025-12-15 15:31:53', 65000.00, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `produk`
+--
+
+CREATE TABLE `produk` (
+  `id_produk` int(11) NOT NULL,
+  `id_kategori` int(11) NOT NULL,
+  `nama_produk` varchar(255) NOT NULL,
+  `merk` varchar(100) DEFAULT NULL,
+  `harga_jual` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `harga_modal` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `stok` int(11) NOT NULL DEFAULT 0,
+  `deskripsi` text DEFAULT NULL,
+  `satuan` varchar(50) NOT NULL DEFAULT 'pcs',
+  `gambar` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `produk`
+--
+
+INSERT INTO `produk` (`id_produk`, `id_kategori`, `nama_produk`, `merk`, `harga_jual`, `harga_modal`, `stok`, `deskripsi`, `satuan`, `gambar`, `created_at`, `updated_at`) VALUES
+(8, 1, 'Bolt Kitten 800gr', 'Bolt', 20000.00, 10000.00, 12, '', 'pcs', NULL, '2025-07-24 06:09:14', '2025-12-15 08:31:53'),
+(9, 1, 'Felibite 500gr', 'Felibite', 15000.00, 7500.00, 13, '', 'pcs', NULL, '2025-07-24 06:09:35', '2025-12-15 08:31:53'),
+(10, 2, 'Markotops Lavender 5,5L', 'Markotops', 38000.00, 19000.00, 11, '', 'pcs', NULL, '2025-07-24 06:09:51', '2025-11-27 09:29:08'),
+(11, 2, 'Royal Belle 5L', 'Royal Belle S', 38000.00, 19000.00, 9, '', 'pcs', NULL, '2025-07-24 06:10:17', '2025-11-27 09:29:08');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roles`
+--
+
+CREATE TABLE `roles` (
+  `role_name` varchar(50) NOT NULL,
+  `role_level` int(11) NOT NULL,
+  `permissions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`permissions`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`role_name`, `role_level`, `permissions`, `created_at`, `updated_at`) VALUES
+('admin', 80, '{\"user_management\": true, \"role_management\": false, \"product_management\": true, \"category_management\": true, \"sales_management\": true, \"report_management\": true, \"system_settings\": true, \"backup_restore\": true, \"view_dashboard\": true, \"view_profile\": true, \"edit_profile\": true, \"change_password\": true, \"stock_management\": true, \"purchase_management\": true}', '2025-10-06 02:18:42', '2025-11-13 20:27:46'),
+('Moderator', 50, '{\"product_management\":true}', '2025-12-15 08:15:53', '2025-12-15 08:16:04'),
+('super_admin', 100, '{\"user_management\": true, \"role_management\": true, \"product_management\": true, \"category_management\": true, \"sales_management\": true, \"report_management\": true, \"system_settings\": true, \"backup_restore\": true, \"view_dashboard\": true, \"view_profile\": true, \"edit_profile\": true, \"change_password\": true, \"stock_management\": true, \"purchase_management\": true}', '2025-10-06 02:18:42', '2025-11-13 20:27:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `settings`
+--
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL DEFAULT 1,
+  `store_name` varchar(255) DEFAULT '',
+  `store_address` text DEFAULT NULL,
+  `store_phone` varchar(20) DEFAULT '',
+  `store_email` varchar(255) DEFAULT '',
+  `store_description` text DEFAULT NULL,
+  `theme` varchar(20) DEFAULT 'light',
+  `language` varchar(10) DEFAULT 'id',
+  `email_notifications` tinyint(1) DEFAULT 0,
+  `currency` varchar(10) DEFAULT 'IDR',
+  `date_format` varchar(20) DEFAULT 'd/m/Y',
+  `timezone` varchar(50) DEFAULT 'Asia/Jakarta',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `settings`
+--
+
+INSERT INTO `settings` (`id`, `store_name`, `store_address`, `store_phone`, `store_email`, `store_description`, `theme`, `language`, `email_notifications`, `currency`, `date_format`, `timezone`, `created_at`, `updated_at`) VALUES
+(1, 'Farizal Petshop', '', '081310108547', '', '', 'dark', 'id', 0, 'IDR', 'd/m/Y', 'Asia/Jakarta', '2025-09-05 21:02:45', '2025-11-27 08:52:04');
 
 -- --------------------------------------------------------
 
@@ -48,167 +241,69 @@ CREATE TABLE `user` (
   `email` varchar(150) NOT NULL DEFAULT '',
   `role` varchar(50) NOT NULL DEFAULT 'user',
   `foto_profil` varchar(255) DEFAULT NULL,
-  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `settings`
+-- Dumping data for table `user`
 --
 
-CREATE TABLE `settings` (
-  `id` int(11) NOT NULL DEFAULT 1,
-  `store_name` varchar(255) DEFAULT '',
-  `store_address` text,
-  `store_phone` varchar(20) DEFAULT '',
-  `store_email` varchar(255) DEFAULT '',
-  `store_description` text,
-  `theme` varchar(20) DEFAULT 'light',
-  `language` varchar(10) DEFAULT 'id',
-  `email_notifications` tinyint(1) DEFAULT 0,
-  `currency` varchar(10) DEFAULT 'IDR',
-  `date_format` varchar(20) DEFAULT 'd/m/Y',
-  `timezone` varchar(50) DEFAULT 'Asia/Jakarta',
-  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `roles`
---
-
-CREATE TABLE IF NOT EXISTS roles (
-    role_name VARCHAR(50) PRIMARY KEY,
-    role_level INT NOT NULL,
-    permissions JSON NOT NULL,
-    stock_permission BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `kategori`
---
-
-CREATE TABLE IF NOT EXISTS kategori (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `produk`
---
-
-CREATE TABLE IF NOT EXISTS produk (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
-    kategori_id INT NOT NULL,
-    harga DECIMAL(10,2) NOT NULL,
-    harga_modal DECIMAL(15,2) NOT NULL DEFAULT 0,
-    stok INT NOT NULL DEFAULT 0,
-    satuan VARCHAR(50) DEFAULT 'pcs',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (kategori_id) REFERENCES kategori(id) ON DELETE CASCADE
-);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pembelian`
---
-
-CREATE TABLE IF NOT EXISTS pembelian (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tanggal DATE NOT NULL,
-    supplier VARCHAR(255) NOT NULL,
-    total DECIMAL(10,2) NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `detail_pembelian`
---
-
-CREATE TABLE IF NOT EXISTS detail_pembelian (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    pembelian_id INT NOT NULL,
-    produk_id INT NOT NULL,
-    jumlah INT NOT NULL,
-    satuan VARCHAR(50) DEFAULT 'pcs',
-    harga DECIMAL(10,2) NOT NULL,
-    subtotal DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (pembelian_id) REFERENCES pembelian(id) ON DELETE CASCADE,
-    FOREIGN KEY (produk_id) REFERENCES produk(id) ON DELETE CASCADE
-);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `penjualan`
---
-
-CREATE TABLE IF NOT EXISTS penjualan (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tanggal DATE NOT NULL,
-    customer VARCHAR(255) NOT NULL,
-    total DECIMAL(10,2) NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `detail_penjualan`
---
-
-CREATE TABLE IF NOT EXISTS detail_penjualan (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    penjualan_id INT NOT NULL,
-    produk_id INT NOT NULL,
-    jumlah INT NOT NULL,
-    satuan VARCHAR(50) DEFAULT 'pcs',
-    harga DECIMAL(10,2) NOT NULL,
-    harga_modal DECIMAL(15,2) NOT NULL DEFAULT 0,
-    subtotal DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (penjualan_id) REFERENCES penjualan(id) ON DELETE CASCADE,
-    FOREIGN KEY (produk_id) REFERENCES produk(id) ON DELETE CASCADE
-);
+INSERT INTO `user` (`id`, `nama`, `username`, `password`, `email`, `role`, `foto_profil`, `created_at`, `updated_at`) VALUES
+(1, 'Mad Farizi', 'admin', '$2y$12$1iqtUCb2YgCRQ.jSZ94wyOR9pvVvbzjPAALdJELwMNRcL42Vn916a', 'admin@example.com', 'super_admin', 'profile_1_1757030273.png', '2025-10-15 05:12:59', '2025-10-16 08:10:43'),
+(9, 'test', 'test', '$2y$12$5NHokwrHJ/OSkHqD9lGXN.ZjJWRFIch7FtFjEeVuCw03W6DTp7Txa', 'email@example.com', 'Moderator', NULL, '2025-12-15 08:15:37', '2025-12-15 08:16:11');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `kontak`
+-- Indexes for table `detail_pembelian`
 --
-ALTER TABLE `kontak`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `detail_pembelian`
+  ADD PRIMARY KEY (`id_detail`),
+  ADD KEY `idx_id_pembelian` (`id_pembelian`),
+  ADD KEY `idx_id_produk` (`id_produk`);
 
 --
--- Indexes for table `user`
+-- Indexes for table `detail_penjualan`
 --
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`);
+ALTER TABLE `detail_penjualan`
+  ADD PRIMARY KEY (`id_detail`),
+  ADD KEY `fk_penjualan` (`id_penjualan`),
+  ADD KEY `fk_produk` (`id_produk`);
+
+--
+-- Indexes for table `kategori`
+--
+ALTER TABLE `kategori`
+  ADD PRIMARY KEY (`id_kategori`);
+
+--
+-- Indexes for table `pembelian`
+--
+ALTER TABLE `pembelian`
+  ADD PRIMARY KEY (`id_pembelian`),
+  ADD KEY `idx_tanggal` (`tanggal`);
+
+--
+-- Indexes for table `penjualan`
+--
+ALTER TABLE `penjualan`
+  ADD PRIMARY KEY (`id_penjualan`);
+
+--
+-- Indexes for table `produk`
+--
+ALTER TABLE `produk`
+  ADD PRIMARY KEY (`id_produk`),
+  ADD KEY `id_kategori` (`id_kategori`);
+
+--
+-- Indexes for table `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`role_name`);
 
 --
 -- Indexes for table `settings`
@@ -217,148 +312,88 @@ ALTER TABLE `settings`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD KEY `user_ibfk_1` (`role`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `kontak`
+-- AUTO_INCREMENT for table `detail_pembelian`
 --
-ALTER TABLE `kontak`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `detail_pembelian`
+  MODIFY `id_detail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `detail_penjualan`
+--
+ALTER TABLE `detail_penjualan`
+  MODIFY `id_detail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+
+--
+-- AUTO_INCREMENT for table `kategori`
+--
+ALTER TABLE `kategori`
+  MODIFY `id_kategori` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `pembelian`
+--
+ALTER TABLE `pembelian`
+  MODIFY `id_pembelian` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `penjualan`
+--
+ALTER TABLE `penjualan`
+  MODIFY `id_penjualan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT for table `produk`
+--
+ALTER TABLE `produk`
+  MODIFY `id_produk` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- Dumping data for table `settings`
+-- Constraints for dumped tables
 --
 
-INSERT INTO `settings` (`id`) VALUES (1);
+--
+-- Constraints for table `detail_pembelian`
+--
+ALTER TABLE `detail_pembelian`
+  ADD CONSTRAINT `detail_pembelian_ibfk_1` FOREIGN KEY (`id_pembelian`) REFERENCES `pembelian` (`id_pembelian`) ON DELETE CASCADE,
+  ADD CONSTRAINT `detail_pembelian_ibfk_2` FOREIGN KEY (`id_produk`) REFERENCES `produk` (`id_produk`) ON DELETE CASCADE;
 
 --
--- Dumping data for table `roles`
+-- Constraints for table `detail_penjualan`
 --
+ALTER TABLE `detail_penjualan`
+  ADD CONSTRAINT `fk_penjualan` FOREIGN KEY (`id_penjualan`) REFERENCES `penjualan` (`id_penjualan`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_produk` FOREIGN KEY (`id_produk`) REFERENCES `produk` (`id_produk`) ON DELETE CASCADE;
 
-INSERT INTO roles (role_name, role_level, permissions, stock_permission) VALUES
-('super_admin', 100, JSON_OBJECT(
-    'user_management', true,
-    'role_management', true,
-    'product_management', true,
-    'category_management', true,
-    'sales_management', true,
-    'report_management', true,
-    'system_settings', true,
-    'backup_restore', true,
-    'view_dashboard', true,
-    'view_profile', true,
-    'edit_profile', true,
-    'change_password', true
-), TRUE),
-('admin', 80, JSON_OBJECT(
-    'user_management', true,
-    'role_management', false,
-    'product_management', true,
-    'category_management', true,
-    'sales_management', true,
-    'report_management', true,
-    'system_settings', true,
-    'backup_restore', true,
-    'view_dashboard', true,
-    'view_profile', true,
-    'edit_profile', true,
-    'change_password', true
-), TRUE),
-('manager', 60, JSON_OBJECT(
-    'user_management', false,
-    'role_management', false,
-    'product_management', true,
-    'category_management', true,
-    'sales_management', true,
-    'report_management', true,
-    'system_settings', false,
-    'backup_restore', false,
-    'view_dashboard', true,
-    'view_profile', true,
-    'edit_profile', true,
-    'change_password', true
-), TRUE),
-('staff', 40, JSON_OBJECT(
-    'user_management', false,
-    'role_management', false,
-    'product_management', true,
-    'category_management', false,
-    'sales_management', true,
-    'report_management', false,
-    'system_settings', false,
-    'backup_restore', false,
-    'view_dashboard', true,
-    'view_profile', true,
-    'edit_profile', true,
-    'change_password', true
-), TRUE),
-('user', 20, JSON_OBJECT(
-    'user_management', false,
-    'role_management', false,
-    'product_management', false,
-    'category_management', false,
-    'sales_management', false,
-    'report_management', false,
-    'system_settings', false,
-    'backup_restore', false,
-    'view_dashboard', true,
-    'view_profile', true,
-    'edit_profile', true,
-    'change_password', true
-), FALSE),
-('guest', 0, JSON_OBJECT(
-    'user_management', false,
-    'role_management', false,
-    'product_management', false,
-    'category_management', false,
-    'sales_management', false,
-    'report_management', false,
-    'system_settings', false,
-    'backup_restore', false,
-    'view_dashboard', false,
-    'view_profile', false,
-    'edit_profile', false,
-    'change_password', false
-), FALSE);
+--
+-- Constraints for table `produk`
+--
+ALTER TABLE `produk`
+  ADD CONSTRAINT `produk_ibfk_1` FOREIGN KEY (`id_kategori`) REFERENCES `kategori` (`id_kategori`);
 
--- Additional updates from migrations
-
--- Add stock_permission column to user table
-ALTER TABLE user ADD COLUMN stock_permission BOOLEAN DEFAULT FALSE AFTER role;
-
--- Update stock_permission based on role (for existing users, set to TRUE for admin and super_admin, FALSE for others)
-UPDATE user SET stock_permission = CASE
-    WHEN role IN ('admin', 'super_admin') THEN TRUE
-    ELSE FALSE
-END WHERE stock_permission IS NULL OR stock_permission = FALSE;
-
--- Update roles table to add stock_management permission
-
--- Update super_admin role
-UPDATE roles SET permissions = JSON_SET(permissions, '$.stock_management', true) WHERE role_name = 'super_admin';
-
--- Update admin role
-UPDATE roles SET permissions = JSON_SET(permissions, '$.stock_management', true) WHERE role_name = 'admin';
-
--- Update manager role
-UPDATE roles SET permissions = JSON_SET(permissions, '$.stock_management', true) WHERE role_name = 'manager';
-
--- Update staff role
-UPDATE roles SET permissions = JSON_SET(permissions, '$.stock_management', true) WHERE role_name = 'staff';
-
--- Update user role (no stock management permission)
-UPDATE roles SET permissions = JSON_SET(permissions, '$.stock_management', false) WHERE role_name = 'user';
-
--- Update guest role (no stock management permission)
-UPDATE roles SET permissions = JSON_SET(permissions, '$.stock_management', false) WHERE role_name = 'guest';
-
+--
+-- Constraints for table `user`
+--
+ALTER TABLE `user`
+  ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`role`) REFERENCES `roles` (`role_name`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

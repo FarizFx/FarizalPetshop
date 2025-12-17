@@ -136,6 +136,7 @@ $monthly_data = $connection->query($monthly_query);
 
 // Format currency function
 function formatCurrency($amount, $currency_type) {
+    $amount = $amount ?? 0; // Handle null values
     if ($currency_type == 'USD') {
         return '$ ' . number_format($amount * getExchangeRate('IDR', 'USD'), 2, '.', ',');
     } else {
@@ -354,11 +355,11 @@ function formatCurrency($amount, $currency_type) {
                                                     <td class="text-end fw-bold text-warning"><?= number_format($sales_data['total_items_sold'] ?? 0) ?></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Total Modal</td>
+                                                    <td><?= __('Total Cost') ?></td>
                                                     <td class="text-end fw-bold text-danger">Rp <?= number_format($sales_data['total_cost'] ?? 0, 0, ',', '.') ?></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Total Profit</td>
+                                                    <td><?= __('Total Profit') ?></td>
                                                     <td class="text-end fw-bold text-success">Rp <?= number_format($sales_data['total_profit'] ?? 0, 0, ',', '.') ?></td>
                                                 </tr>
                                             </tbody>
@@ -381,8 +382,8 @@ function formatCurrency($amount, $currency_type) {
                                                     <th class="text-end"><?= __('Transactions') ?></th>
                                                     <th class="text-end"><?= __('Items Sold') ?></th>
                                                     <th class="text-end"><?= __('Revenue') ?></th>
-                                                    <th class="text-end">Cost</th>
-                                                    <th class="text-end">Profit</th>
+                                                    <th class="text-end"><?= __('Cost') ?></th>
+                                                    <th class="text-end"><?= __('Profit') ?></th>
                                                     <th class="text-end"><?= __('Contribution') ?> (%)</th>
                                                 </tr>
                                             </thead>
@@ -426,8 +427,8 @@ function formatCurrency($amount, $currency_type) {
                                                     <th class="text-end"><?= __('Unit Price') ?></th>
                                                     <th class="text-end"><?= __('Units Sold') ?></th>
                                                     <th class="text-end"><?= __('Total Revenue') ?></th>
-                                                    <th class="text-end">Total Cost</th>
-                                                    <th class="text-end">Total Profit</th>
+                                                    <th class="text-end"><?= __('Total Cost') ?></th>
+                                                    <th class="text-end"><?= __('Total Profit') ?></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -439,7 +440,7 @@ function formatCurrency($amount, $currency_type) {
                                                         <td class="fw-bold text-primary">#<?= $rank++ ?></td>
                                                         <td class="fw-bold"><?= htmlspecialchars($row['nama_produk']) ?></td>
                                                         <td><span class="badge bg-secondary"><?= htmlspecialchars($row['nama_kategori']) ?></span></td>
-                                                        <td class="text-end"><?= formatCurrency($row['harga'], $currency) ?></td>
+                                                        <td class="text-end"><?= formatCurrency($row['harga_jual'], $currency) ?></td>
                                                         <td class="text-end fw-bold text-warning"><?= number_format($row['total_sold']) ?></td>
                                                         <td class="text-end fw-bold text-success"><?= formatCurrency($row['total_revenue'], $currency) ?></td>
                                                         <td class="text-end text-danger fw-bold">Rp <?= number_format($row['total_cost'], 0, ',', '.') ?></td>

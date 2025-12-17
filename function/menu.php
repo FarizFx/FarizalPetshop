@@ -87,7 +87,7 @@ if (isset($_GET['halaman'])) {
             include "page/penjualan/detail.php";
             break;
         case 'cetak_struk':
-            include "page/penjualan/cetak.php";
+            include "page/penjualan/cetak_struk.php";
             break;
         case 'users':
             include "page/users.php";

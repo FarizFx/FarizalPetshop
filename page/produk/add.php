@@ -1,24 +1,49 @@
 <?php
 include "./function/connection.php";
 
+// Check if user has product_management permission
+if (!hasPermission('product_management')) {
+    echo "
+    <script>
+    Swal.fire({
+        title: 'Akses Ditolak',
+        text: 'Anda tidak memiliki izin untuk mengelola produk',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+    }).then(() => {
+        window.location.href = 'index.php?halaman=produk';
+    })
+    </script>
+    ";
+    exit();
+}
+
 try {
     $message = "";
     $success = false;
     $error = false;
 
     if (isset($_POST['submit'])) {
-        $nama_produk = htmlspecialchars($_POST['nama_produk']);
-        $id_kategori = $_POST['id_kategori'];
-        $merk = htmlspecialchars($_POST['merk']);
-        $harga = str_replace('.', '', $_POST['harga']);
-        $harga_modal = str_replace('.', '', $_POST['harga_modal']);
-        $stok = $_POST['stok'];
-        $deskripsi = htmlspecialchars($_POST['deskripsi']);
-        $satuan = htmlspecialchars($_POST['satuan']);
+        $nama = isset($_POST['nama_produk']) ? trim($_POST['nama_produk']) : '';
+        $kategori_id = isset($_POST['id_kategori']) ? (int)$_POST['id_kategori'] : 0;
+        $merk = isset($_POST['merk']) ? trim($_POST['merk']) : '';
+        $harga = isset($_POST['harga']) ? (float)str_replace('.', '', $_POST['harga']) : 0;
+        $harga_modal = isset($_POST['harga_modal']) ? (float)str_replace('.', '', $_POST['harga_modal']) : 0;
+        $stok = isset($_POST['stok']) ? (int)$_POST['stok'] : 0;
+        $deskripsi = isset($_POST['deskripsi']) ? trim($_POST['deskripsi']) : '';
 
-        $query = mysqli_query($connection, "INSERT INTO produk (nama_produk, id_kategori, merk, harga, harga_modal, stok, deskripsi, satuan) VALUES ('$nama_produk', '$id_kategori', '$merk', '$harga', '$harga_modal', '$stok', '$deskripsi', '$satuan')");
+        // Validasi input
+        if (empty($nama) || empty($kategori_id) || empty($harga) || empty($stok)) {
+            throw new Exception("Data tidak lengkap. Semua field wajib diisi.");
+        }
 
-        if ($query) {
+        // Insert data
+        $query = "INSERT INTO produk (nama_produk, id_kategori, merk, harga_jual, harga_modal, stok, deskripsi) 
+                  VALUES ('$nama', '$kategori_id', '$merk', '$harga', '$harga_modal', '$stok', '$deskripsi')";
+        
+        if (mysqli_query($connection, $query)) {
             $message = "Produk berhasil ditambahkan";
             echo "
             <script>
@@ -35,35 +60,22 @@ try {
             </script>
             ";
         } else {
-            $message = "Gagal menambahkan produk: " . mysqli_error($connection);
-            echo "
-            <script>
-            Swal.fire({
-                title: 'Gagal',
-                text: '$message',
-                icon: 'error',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-            }).then(() => {
-                window.location.href = 'index.php?halaman=tambah_produk';
-            })
-            </script>
-            ";
+            throw new Exception("Gagal menambahkan produk: " . mysqli_error($connection));
         }
     }
-} catch (\Throwable $th) {
+} catch (Exception $th) {
+    $error_message = addslashes($th->getMessage());
     echo "
     <script>
     Swal.fire({
-        title: 'Error',
-        text: 'Terjadi kesalahan server',
+        title: 'Gagal',
+        text: '$error_message',
         icon: 'error',
         showConfirmButton: false,
-        timer: 2000,
+        timer: 3000,
         timerProgressBar: true,
     }).then(() => {
-        window.location.href = 'index.php?halaman=produk';
+        window.location.href = 'index.php?halaman=tambah_produk';
     })
     </script>
     ";
@@ -108,7 +120,7 @@ try {
                         <select class="form-select" id="id_kategori" name="id_kategori" required>
                             <option value="">Pilih Kategori</option>
                             <?php
-                            $kategori = mysqli_query($connection, "SELECT * FROM kategori");
+                            $kategori = mysqli_query($connection, "SELECT id_kategori, nama_kategori FROM kategori");
                             while($k = mysqli_fetch_assoc($kategori)) {
                                 echo '<option value="'.$k['id_kategori'].'">'.$k['nama_kategori'].'</option>';
                             }
@@ -141,22 +153,6 @@ try {
                     <div class="mb-3">
                         <label for="deskripsi" class="form-label">Deskripsi</label>
                         <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="satuan" class="form-label">Satuan</label>
-                        <select class="form-select" id="satuan" name="satuan" required>
-                            <option value="pcs">pcs</option>
-                            <option value="dus">dus</option>
-                            <option value="pack">pack</option>
-                            <option value="box">box</option>
-                            <option value="kg">kg</option>
-                            <option value="liter">liter</option>
-                            <option value="meter">meter</option>
-                            <option value="lembar">lembar</option>
-                            <option value="buah">buah</option>
-                            <option value="botol">botol</option>
-                        </select>
                     </div>
 
                     <div class="mb-3">

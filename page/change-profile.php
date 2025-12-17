@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+
 require_once 'function/connection.php';
 
 $user_id = $_SESSION['user_id'];
@@ -12,8 +13,8 @@ $error = '';
 $success = '';
 
 // Get user data
-$query = "SELECT * FROM users WHERE id = ?";
-$stmt = $conn->prepare($query);
+$query = "SELECT * FROM user WHERE id = ?";
+$stmt = $connection->prepare($query);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -30,8 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid!';
     } else {
+
         // Check if email already exists (except current user)
-        $check_email = $conn->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+        $check_email = $connection->prepare("SELECT id FROM user WHERE email = ? AND id != ?");
         $check_email->bind_param("si", $email, $user_id);
         $check_email->execute();
         
@@ -70,9 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($error)) {
+
                 // Update user data
-                $update_query = "UPDATE users SET nama = ?, email = ?, username = ?, foto_profil = ?, updated_at = NOW() WHERE id = ?";
-                $stmt = $conn->prepare($update_query);
+                $update_query = "UPDATE user SET nama = ?, email = ?, username = ?, foto_profil = ?, updated_at = NOW() WHERE id = ?";
+                $stmt = $connection->prepare($update_query);
                 $stmt->bind_param("ssssi", $nama, $email, $username, $foto_profil, $user_id);
                 
                 if ($stmt->execute()) {

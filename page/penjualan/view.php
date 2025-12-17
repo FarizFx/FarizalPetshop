@@ -156,7 +156,7 @@ body.modal-open .sidebar {
                                                  data-id="<?= $data['id_penjualan'] ?>">
                                              <i class="bi bi-eye"></i> <?= __('Detail') ?>
                                           </button>
-                                          <a href="cetak_struk.php?id=<?= $data['id_penjualan'] ?>"
+                                          <a href="index.php?halaman=cetak_struk&id=<?= $data['id_penjualan'] ?>"
                                              target="_blank" class="btn btn-sm btn-success">
                                              <i class="bi bi-printer"></i> <?= __('Print') ?>
                                          </a>

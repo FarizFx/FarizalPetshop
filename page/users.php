@@ -250,7 +250,7 @@ $users_result = $connection->query($users_query);
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <form method="POST" action="process_add_user.php">
+                        <form method="POST" action="page/process_add_user.php">
                             <div class="modal-body">
                                 <div class="mb-3">
                                     <label for="nama" class="form-label">
